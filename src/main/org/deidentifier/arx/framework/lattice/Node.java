@@ -62,9 +62,7 @@ public class Node {
     }
 
     public Node(int id) {
-        // TODO: implement correctly
-        this.id = id;
-        throw new UnsupportedOperationException();
+        this.id = -1;
     }
 
     /*
@@ -198,8 +196,21 @@ public class Node {
         lattice.setData(id, data);
     }
 
+    /**
+     * Used to allow to create a specicic node
+     * @param transformation
+     * @param level
+     */
     public void setTransformation(int[] transformation, int level) {
-        throw new UnsupportedOperationException();
+//        throw new UnsupportedOperationException();
+        System.out.println("Ugly!");
+        int[] maxLevels = new int[transformation.length];
+        for (int i = 0; i < maxLevels.length; i++) {
+            maxLevels[i] = transformation[i] + 1;
+        }
+        
+        lattice = new Lattice(maxLevels);
+        this.id = lattice.getIndex(transformation);
     }
 
     protected void addPredecessor(Node node) {

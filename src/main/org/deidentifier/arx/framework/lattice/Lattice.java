@@ -97,15 +97,43 @@ public class Lattice {
         lowerBound = new HashMap<Integer, InformationLoss<?>>();
     }
 
-    public Lattice(Node[][] nodes, int i) {
-        // TODO: Implement correctly!!
-        maxLevels = null;
-        offsets = null;
-        nodeProperties = null;
-        data = null;
-        informationLoss = null;
-        lowerBound = null;
-        throw new UnsupportedOperationException();
+    public Lattice(Node[][] nodes, int levels) {
+
+        Node node = null;
+        for (int j = 0; j < nodes.length; j++) {
+            Node[] level = nodes[j];
+            for (int k = 0; k < level.length; k++) {
+                node = level[k];
+            }
+        }
+        int[] transformation = node.getTransformation();
+        int[] maxLevels = new int[transformation.length];
+        for (int i = 0; i < maxLevels.length; i++) {
+            maxLevels[i] = transformation[i] + 1;
+        }
+        this.maxLevels = new int[maxLevels.length];
+        this.offsets = new int[maxLevels.length];
+        this.basis = Arrays.copyOf(maxLevels, maxLevels.length);
+
+        int size = 1;
+        for (int i = maxLevels.length - 1; i >= 0; i--) {
+            offsets[i] = size;
+            size *= maxLevels[i];
+
+            this.maxLevels[i] = maxLevels[i] - 1;
+        }
+        nodeProperties = new int[size];
+
+        data = new HashMap<Integer, Object>();
+        informationLoss = new HashMap<Integer, InformationLoss<?>>();
+        lowerBound = new HashMap<Integer, InformationLoss<?>>();
+        
+        
+
+        
+        // throw new UnsupportedOperationException();
+        System.out.println("Ugly!");
+
     }
 
     public Node getBottom() {
@@ -245,7 +273,7 @@ public class Lattice {
         tagTrigger = trigger;
     }
 
-    private int getIndex(int[] transformation) {
+    protected int getIndex(int[] transformation) {
         int index = 0;
         for (int i = 0; i < transformation.length; i++) {
             index += offsets[i] * transformation[i];
