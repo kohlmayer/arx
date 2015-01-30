@@ -739,7 +739,7 @@ public class ARXLattice implements Serializable {
             levels[i] = new ARXNode[level.length];
             for (int j = 0; j < level.length; j++) {
                 final ARXNode node = new ARXNode(level[j], headermap);
-                if (level[j] == globalOptimum) {
+                if (level[j].equals(globalOptimum)) {
                     optimum = node;
                 }
                 levels[i][j] = node;
