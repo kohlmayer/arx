@@ -177,8 +177,6 @@ public class NodeChecker implements INodeChecker {
         InformationLoss<?> loss = result != null ? result.getInformationLoss() : null;
         InformationLoss<?> bound = result != null ? result.getLowerBound() : metric.getLowerBound(node, currentGroupify);
         
-        System.out.println(Arrays.toString(node.getTransformation()) + "-" + currentGroupify.isAnonymous());
-        
         // Return result;
         return new INodeChecker.Result(currentGroupify.isAnonymous(), 
                                        currentGroupify.isKAnonymous(),

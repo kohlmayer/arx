@@ -149,9 +149,6 @@ public class FLASHAlgorithmImpl extends AbstractAlgorithm {
 
                 // First phase
                 List<Node> path = findPath(head, triggerSkip);
-                
-                System.out.println(path);
-                
                 head = checkPath(path, triggerSkip, queue);
 
                 // Second phase
@@ -229,7 +226,6 @@ public class FLASHAlgorithmImpl extends AbstractAlgorithm {
                 if (!node.hasProperty(anonymityProperty)) {
                     for (final Node up : node.getSuccessors()) {
                         if (!skip(triggerSkip, up)) {
-                            System.out.println("Adding: " + up);
                             queue.add(up);
                         }
                     }
