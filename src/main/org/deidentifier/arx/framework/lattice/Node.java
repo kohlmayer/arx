@@ -64,6 +64,7 @@ public class Node {
     public Node(int id) {
         // TODO: implement correctly
         this.id = id;
+        throw new UnsupportedOperationException();
     }
 
     /*
