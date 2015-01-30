@@ -207,7 +207,7 @@ public class Lattice {
             if (state != 0) {
                 int predecessorIndex = index - offsets[i];
                 if (!hasProperty(predecessorIndex, property)) {
-                    setPropertyDownwards(predecessorIndex, include, property);
+                    setPropertyDownwards(predecessorIndex, true, property);
                 }
             }
             tempIndex /= basis[i];
@@ -230,7 +230,7 @@ public class Lattice {
             if (state < maxLevels[i]) {
                 int successorIndex = index + offsets[i];
                 if (!hasProperty(successorIndex, property)) {
-                    setPropertyUpwards(successorIndex, include, property);
+                    setPropertyUpwards(successorIndex, true, property);
                 }
             }
             tempIndex /= basis[i];
