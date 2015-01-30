@@ -202,22 +202,12 @@ public class Node {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * Adds a predecessor
-     * 
-     * @param node
-     */
     protected void addPredecessor(Node node) {
-        // empty by design
+        throw new UnsupportedOperationException();
     }
 
-    /**
-     * Adds a successor
-     * 
-     * @param node
-     */
     protected void addSuccessor(Node node) {
-        // empty by design
+        throw new UnsupportedOperationException();
     }
 
     protected void setInformationLoss(final InformationLoss<?> informationLoss) {
