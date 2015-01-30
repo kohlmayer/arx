@@ -53,8 +53,15 @@ public class LatticeBuilder {
      * @return the lattice
      */
     public Lattice build() {
-        final int numNodes = buildLevelsAndMap();
-        return new Lattice(levels, numNodes);
+        int[] max = new int[maxLevels.length];
+        for (int i = 0; i < max.length; i++) {
+            max[i] = maxLevels[i] +1;
+        }
+        
+        
+        return new Lattice(max);
+//        final int numNodes = buildLevelsAndMap();
+//        return new Lattice(levels, numNodes);
     }
 
     /**

@@ -17,6 +17,8 @@
 
 package org.deidentifier.arx.framework.check;
 
+import java.util.Arrays;
+
 import org.deidentifier.arx.ARXConfiguration;
 import org.deidentifier.arx.ARXConfiguration.ARXConfigurationInternal;
 import org.deidentifier.arx.framework.check.StateMachine.Transition;
@@ -174,6 +176,8 @@ public class NodeChecker implements INodeChecker {
                                           metric.getInformationLoss(node, currentGroupify) : null;
         InformationLoss<?> loss = result != null ? result.getInformationLoss() : null;
         InformationLoss<?> bound = result != null ? result.getLowerBound() : metric.getLowerBound(node, currentGroupify);
+        
+        System.out.println(Arrays.toString(node.getTransformation()) + "-" + currentGroupify.isAnonymous());
         
         // Return result;
         return new INodeChecker.Result(currentGroupify.isAnonymous(), 

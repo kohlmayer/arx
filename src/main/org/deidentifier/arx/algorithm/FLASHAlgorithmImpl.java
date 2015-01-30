@@ -149,6 +149,9 @@ public class FLASHAlgorithmImpl extends AbstractAlgorithm {
 
                 // First phase
                 List<Node> path = findPath(head, triggerSkip);
+                
+                System.out.println(path);
+                
                 head = checkPath(path, triggerSkip, queue);
 
                 // Second phase
@@ -226,6 +229,7 @@ public class FLASHAlgorithmImpl extends AbstractAlgorithm {
                 if (!node.hasProperty(anonymityProperty)) {
                     for (final Node up : node.getSuccessors()) {
                         if (!skip(triggerSkip, up)) {
+                            System.out.println("Adding: " + up);
                             queue.add(up);
                         }
                     }
@@ -282,19 +286,22 @@ public class FLASHAlgorithmImpl extends AbstractAlgorithm {
 
     private Node[] getUnsetNodesAndSort(int level, NodeAction triggerSkip) {
 
-        // Create
-        List<Node> result = new ArrayList<Node>();
+//        // Create
+//        List<Node> result = new ArrayList<Node>();
+//        Node[] nlevel = lattice.getLevels()[level];
+//        for (Node n : nlevel) {
+//            if (!skip(triggerSkip, n)) {
+//                result.add(n);
+//            }
+//        }
+//
+//        // Sort
+//        Node[] resultArray = result.toArray(new Node[result.size()]);
+//        sort(resultArray);
+//        return resultArray;
         Node[] nlevel = lattice.getLevels()[level];
-        for (Node n : nlevel) {
-            if (!skip(triggerSkip, n)) {
-                result.add(n);
-            }
-        }
-
-        // Sort
-        Node[] resultArray = result.toArray(new Node[result.size()]);
-        sort(resultArray);
-        return resultArray;
+        sort(nlevel);
+        return nlevel; 
     }
 
     /**
@@ -467,9 +474,9 @@ public class FLASHAlgorithmImpl extends AbstractAlgorithm {
      * @param node The node
      */
     private void sortSuccessors(final Node node) {
-        if (!sorted[node.id]) {
+//        if (!sorted[node.id]) {
             sort(node.getSuccessors());
-            sorted[node.id] = true;
-        }
+//            sorted[node.id] = true;
+//        }
     }
 }

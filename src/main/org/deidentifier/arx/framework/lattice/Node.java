@@ -21,88 +21,49 @@ import java.util.Arrays;
 
 import org.deidentifier.arx.metric.InformationLoss;
 
-/**
- * The Class Node.
- * 
- * @author Fabian Prasser
- * @author Florian Kohlmayer
- */
 public class Node {
 
     /** All privacy criteria are fulfilled. */
-    public static final int    PROPERTY_ANONYMOUS            = 1 << 0;
+    public static final int PROPERTY_ANONYMOUS            = 1 << 0;
 
     /** Not all privacy criteria are fulfilled. */
-    public static final int    PROPERTY_NOT_ANONYMOUS        = 1 << 1;
+    public static final int PROPERTY_NOT_ANONYMOUS        = 1 << 1;
 
     /** A k-anonymity sub-criterion is fulfilled. */
-    public static final int    PROPERTY_K_ANONYMOUS          = 1 << 2;
+    public static final int PROPERTY_K_ANONYMOUS          = 1 << 2;
 
     /** A k-anonymity sub-criterion is not fulfilled. */
-    public static final int    PROPERTY_NOT_K_ANONYMOUS      = 1 << 3;
+    public static final int PROPERTY_NOT_K_ANONYMOUS      = 1 << 3;
 
     /** The transformation results in insufficient utility. */
-    public static final int    PROPERTY_INSUFFICIENT_UTILITY = 1 << 4;
+    public static final int PROPERTY_INSUFFICIENT_UTILITY = 1 << 4;
 
     /** The transformation has been checked explicitly. */
-    public static final int    PROPERTY_CHECKED              = 1 << 5;
+    public static final int PROPERTY_CHECKED              = 1 << 5;
 
     /** A snapshot for this transformation must be created if it fits the size limits, regardless of whether it triggers the storage condition. */
-    public static final int    PROPERTY_FORCE_SNAPSHOT       = 1 << 6;
+    public static final int PROPERTY_FORCE_SNAPSHOT       = 1 << 6;
 
     /** This node has already been visited during the second phase. */
-    public static final int    PROPERTY_VISITED              = 1 << 7;
+    public static final int PROPERTY_VISITED              = 1 << 7;
 
     /** Marks nodes for which the search algorithm guarantees to never check any of its successors. */
-    public static final int    PROPERTY_SUCCESSORS_PRUNED    = 1 << 8;
+    public static final int PROPERTY_SUCCESSORS_PRUNED    = 1 << 8;
 
     /** We have already fired an event for this node. */
-    public static final int    PROPERTY_EVENT_FIRED          = 1 << 9;
+    public static final int PROPERTY_EVENT_FIRED          = 1 << 9;
 
-    /** The id. */
-    public final int           id;
+    private Lattice         lattice                       = null;
+    public int              id;
 
-    /** Set of properties. */
-    private int                properties;
+    public Node(Lattice lattice, int index) {
+        this.id = index;
+        this.lattice = lattice;
+    }
 
-    /** The predecessors. */
-    private Node[]             predecessors;
-
-    /** The level. */
-    private int                level;
-
-    /** The information loss. */
-    private InformationLoss<?> informationLoss;
-
-    /** The lower bound. */
-    private InformationLoss<?> lowerBound;
-
-    /** The transformation. */
-    private int[]              transformation;
-
-    /** The upwards. */
-    private Node[]             successors;
-
-    /** The down index. */
-    private int                preIndex;
-
-    /** The up index. */
-    private int                sucIndex;
-
-    /** Associated data. */
-    private Object             data;
-
-    /**
-     * Instantiates a new node.
-     *
-     * @param id
-     */
     public Node(int id) {
+        // TODO: implement correctly
         this.id = id;
-        this.informationLoss = null;
-        this.preIndex = 0;
-        this.sucIndex = 0;
-        this.properties = 0;
     }
 
     /*
@@ -112,11 +73,19 @@ public class Node {
      */
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) { return true; }
-        if (obj == null) { return false; }
-        if (getClass() != obj.getClass()) { return false; }
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
         final Node other = (Node) obj;
-        if (!Arrays.equals(transformation, other.transformation)) { return false; }
+        if (id != other.id) {
+            return false;
+        }
         return true;
     }
 
@@ -125,8 +94,9 @@ public class Node {
      *
      * @return
      */
+
     public Object getData() {
-        return data;
+        return lattice.getData(id);
     }
 
     /**
@@ -134,8 +104,9 @@ public class Node {
      *
      * @return
      */
+
     public InformationLoss<?> getInformationLoss() {
-        return informationLoss;
+        return lattice.getInformationLoss(id);
     }
 
     /**
@@ -144,32 +115,47 @@ public class Node {
      * @return
      */
     public int getLevel() {
-        return level;
+        return lattice.getLevel(id);
     }
 
     /**
      * @return the lowerBound
      */
+
     public InformationLoss<?> getLowerBound() {
-        return lowerBound;
+        return lattice.getLowerBound(id);
     }
 
     /**
      * Returns the predecessors.
      *
+     * @param materialize
      * @return
      */
+
+    private Node[] precs;
+
     public Node[] getPredecessors() {
-        return predecessors;
+        if (precs == null) {
+            precs = lattice.getPredecessorsNodes(id);
+        }
+        return precs;
     }
 
     /**
      * Returns the successors.
      *
+     * @param materialize
      * @return
      */
+
+    private Node[] succs;
+
     public Node[] getSuccessors() {
-        return successors;
+        if (succs == null) {
+            succs = lattice.getSuccessorsNodes(id);
+        }
+        return succs;
     }
 
     /**
@@ -177,8 +163,9 @@ public class Node {
      *
      * @return
      */
+
     public int[] getTransformation() {
-        return transformation;
+        return lattice.getTransformation(id);
     }
 
     /*
@@ -186,9 +173,9 @@ public class Node {
      * 
      * @see java.lang.Object#hashCode()
      */
-    @Override
+
     public int hashCode() {
-        return Arrays.hashCode(transformation);
+        return id;
     }
 
     /**
@@ -197,8 +184,8 @@ public class Node {
      * @param property
      * @return
      */
-    public boolean hasProperty(int property){
-        return (properties & property) == property;
+    public boolean hasProperty(int property) {
+        return lattice.hasProperty(id, property);
     }
 
     /**
@@ -207,85 +194,62 @@ public class Node {
      * @param data
      */
     public void setData(Object data) {
-        this.data = data;
+        lattice.setData(id, data);
     }
 
-    /**
-     * Sets the transformation.
-     *
-     * @param transformation
-     * @param level
-     */
     public void setTransformation(int[] transformation, int level) {
-        this.transformation = transformation;
-        this.level = level;
+        throw new UnsupportedOperationException();
     }
 
     /**
-     * Sets the information loss.
-     *
-     * @param informationLoss
+     * Adds a predecessor
+     * 
+     * @param node
      */
+    protected void addPredecessor(Node node) {
+        // empty by design
+    }
+
+    /**
+     * Adds a successor
+     * 
+     * @param node
+     */
+    protected void addSuccessor(Node node) {
+        // empty by design
+    }
+
     protected void setInformationLoss(final InformationLoss<?> informationLoss) {
-        if (this.informationLoss == null) {
-            this.informationLoss = informationLoss;
-        }
+        throw new UnsupportedOperationException();
     }
 
-    /**
-     * Sets the information loss.
-     *
-     * @param lowerBound
-     */
     protected void setLowerBound(final InformationLoss<?> lowerBound) {
-        if (this.lowerBound == null) {
-            this.lowerBound = lowerBound;
-        }
+        throw new UnsupportedOperationException();
     }
 
-    
-    /**
-     * Sets the predecessors.
-     *
-     * @param nodes
-     */
     protected void setPredecessors(Node[] nodes) {
-        predecessors = nodes;
+        throw new UnsupportedOperationException();
     }
 
-    /**
-     * Sets the given property.
-     *
-     * @param property
-     */
-    protected void setProperty(int property){
-        properties |= property;
+    protected void setProperty(int property) {
+        throw new UnsupportedOperationException();
     }
-  
-    /**
-     * Sets the successors.
-     *
-     * @param nodes
-     */
+
     protected void setSuccessors(Node[] nodes) {
-        successors = nodes;
+        throw new UnsupportedOperationException();
     }
 
-    /**
-     * Adds a predecessor.
-     *
-     * @param predecessor
-     */
-    void addPredecessor(Node predecessor) {
-        predecessors[preIndex++] = predecessor;
+    void builderAddPredecessor(Node predecessor) {
+        throw new UnsupportedOperationException();
     }
 
-    /**
-     * Adds a successor.
-     *
-     * @param successor
-     */
-    void addSuccessor(Node successor) {
-        successors[sucIndex++] = successor;
+    void builderAddSuccessor(Node successor) {
+        throw new UnsupportedOperationException();
     }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(getTransformation());
+    }
+
 }

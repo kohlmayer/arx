@@ -17,225 +17,341 @@
 
 package org.deidentifier.arx.framework.lattice;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.deidentifier.arx.ARXListener;
 import org.deidentifier.arx.framework.check.INodeChecker;
 import org.deidentifier.arx.metric.InformationLoss;
 
-/**
- * The class Lattice.
- * 
- * @author Fabian Prasser
- * @author Florian Kohlmayer
- */
 public class Lattice {
 
-    /** The levels. */
-    private final Node[][] levels;
+    public static void main(String[] args) {
+        int[] height = new int[] { 3, 2, 6 };
+        Lattice lattice = new Lattice(height);
 
-    /** The size. */
-    private final int      size;
+        System.out.println("size: " + lattice.getSize());
 
-    /** A listener. */
-    private ARXListener    listener = null;
+        lattice.setPropertyDownwards(lattice.getSize() - 1, true, Node.PROPERTY_ANONYMOUS);
+        for (int i = 0; i < lattice.getSize(); i++) {
+            if (!lattice.hasProperty(i, Node.PROPERTY_ANONYMOUS)) {
+                System.out.println("UOPS");
+            }
+        }
 
-    /** Tag trigger. */
-    private NodeAction     tagTrigger = null;
+        lattice.setPropertyUpwards(0, true, Node.PROPERTY_EVENT_FIRED);
+        for (int i = 0; i < lattice.getSize(); i++) {
+            if (!lattice.hasProperty(i, Node.PROPERTY_EVENT_FIRED)) {
+                System.out.println("UOPS");
+            }
+        }
 
-    /**
-     * Initializes a lattice.
-     *
-     * @param levels the levels
-     * @param maxLevels the max levels
-     */
-    public Lattice(final Node[][] levels, final int numNodes) {
-
-        this.levels = levels;
-        this.size = numNodes;
     }
 
-    /**
-     * Returns the bottom node.
-     *
-     * @return
-     */
+    /** A listener */
+    private ARXListener                            listener   = null;
+
+    /** Tag trigger */
+    private NodeAction                             tagTrigger = null;
+
+    private final int[]                            maxLevels;
+    private final int[]                            offsets;
+    private final int[]                            nodeProperties;
+    private final Map<Integer, Object>             data;
+    private final Map<Integer, InformationLoss<?>> informationLoss;
+    private final Map<Integer, InformationLoss<?>> lowerBound;
+
+    public Lattice(int[] maxLevels) {
+        this.maxLevels = new int[maxLevels.length];
+        offsets = new int[maxLevels.length];
+
+        int size = 1;
+        for (int i = 0; i < maxLevels.length; i++) {
+            offsets[i] = size;
+            size *= maxLevels[i];
+            this.maxLevels[i] = maxLevels[i] - 1;
+        }
+        nodeProperties = new int[size];
+
+        data = new HashMap<Integer, Object>();
+        informationLoss = new HashMap<Integer, InformationLoss<?>>();
+        lowerBound = new HashMap<Integer, InformationLoss<?>>();
+    }
+
+    public Lattice(Node[][] nodes, int i) {
+        // TODO: Implement correctly!!
+        maxLevels = null;
+        offsets = null;
+        nodeProperties = null;
+        data = null;
+        informationLoss = null;
+        lowerBound = null;
+        throw new UnsupportedOperationException();
+    }
+
     public Node getBottom() {
-        for (int i = 0; i<levels.length; i++) {
-            if (levels[i].length==1){
-                return levels[i][0];
-            } else if (levels[i].length > 1) { 
-                throw new RuntimeException("Multiple bottom nodes!"); 
-            }
-        }
-        throw new RuntimeException("Empty lattice!");
+        return getNode(0);
     }
 
-    /**
-     * Returns all levels in the lattice.
-     *
-     * @return
-     */
+    public int getLevel(int index) {
+        return getLevel(getTransformation(index));
+    }
+
     public Node[][] getLevels() {
-        return levels;
-    }
-
-    /**
-     * Returns the number of nodes in the lattice.
-     *
-     * @return
-     */
-    public int getSize() {
-        return size;
-    }
-
-    /**
-     * Returns the top node.
-     *
-     * @return
-     */
-    public Node getTop() {
-        for (int i = levels.length - 1; i>=0; i--) {
-            if (levels[i].length==1){
-                return levels[i][0];
-            } else if (levels[i].length > 1) { 
-                throw new RuntimeException("Multiple top nodes!"); 
-            }
+        // Prepare
+        int height = getTop().getLevel() + 1;
+        @SuppressWarnings("unchecked")
+        List<Node>[] levels = new List[height];
+        for (int i = 0; i < levels.length; i++) {
+            levels[i] = new ArrayList<Node>();
         }
-        throw new RuntimeException("Empty lattice!");
+
+        // Add
+        for (int i = 0; i < nodeProperties.length; i++) {
+            Node node = getNode(i);
+            levels[node.getLevel()].add(node);
+        }
+
+        // Pack
+        Node[][] result = new Node[levels.length][];
+        for (int i = 0; i < levels.length; i++) {
+            result[i] = levels[i].toArray(new Node[levels[i].size()]);
+        }
+
+        // Return
+        return result;
     }
-    
-    /**
-     * Sets the properties to the given node.
-     *
-     * @param node the node
-     * @param result the result
-     */
+
+    public int getSize() {
+        return nodeProperties.length;
+    }
+
+    public Node getTop() {
+        return getNode(getSize() - 1);
+    }
+
     public void setChecked(Node node, INodeChecker.Result result) {
-        
+
+        int index = node.id;
+
         // Set checked
-        setProperty(node, Node.PROPERTY_CHECKED);
-        
+        setProperty(index, Node.PROPERTY_CHECKED);
+
         // Anonymous
-        if (result.anonymous){
-            setProperty(node, Node.PROPERTY_ANONYMOUS);
+        if (result.anonymous) {
+            setProperty(index, Node.PROPERTY_ANONYMOUS);
         } else {
-            setProperty(node, Node.PROPERTY_NOT_ANONYMOUS);
+            setProperty(index, Node.PROPERTY_NOT_ANONYMOUS);
         }
 
         // k-Anonymous
-        if (result.kAnonymous){
-            setProperty(node, Node.PROPERTY_K_ANONYMOUS);
+        if (result.kAnonymous) {
+            setProperty(index, Node.PROPERTY_K_ANONYMOUS);
         } else {
-            setProperty(node, Node.PROPERTY_NOT_K_ANONYMOUS);
+            setProperty(index, Node.PROPERTY_NOT_K_ANONYMOUS);
         }
 
         // Infoloss
-        node.setInformationLoss(result.informationLoss);
-        node.setLowerBound(result.lowerBound);
+        informationLoss.put(index, result.informationLoss);
+        lowerBound.put(index, result.lowerBound);
     }
 
-    /**
-     * Sets the information loss.
-     *
-     * @param node
-     * @param informationLoss
-     */
     public void setInformationLoss(Node node, InformationLoss<?> informationLoss) {
-        node.setInformationLoss(informationLoss);
+        this.informationLoss.put(node.id, informationLoss);
     }
 
-    /**
-     * Sets the lower bound.
-     *
-     * @param node
-     * @param lowerBound
-     */
-    public void setLowerBound(Node node, InformationLoss<?> lowerBound) {
-        node.setLowerBound(lowerBound);
-    }
-
-    /**
-     * Attaches a listener.
-     *
-     * @param listener
-     */
     public void setListener(final ARXListener listener) {
         this.listener = listener;
     }
 
-    /**
-     * Sets the property to the given node.
-     *
-     * @param node the node
-     * @param property the property
-     */
+    public void setLowerBound(Node node, InformationLoss<?> lowerBound) {
+        this.lowerBound.put(node.id, lowerBound);
+    }
+
     public void setProperty(Node node, int property) {
-        
-        if (!node.hasProperty(property)) {
-            node.setProperty(property);
+        int index = node.id;
+        if (!hasProperty(index, property)) {
+            setProperty(index, property);
             triggerTagged(node);
         }
     }
-    
-    /**
-     * Sets the property to all predecessors of the given node.
-     *
-     * @param node the node
-     * @param include should the property also be set for the starting node
-     * @param property the property
-     */
+
+    public void setPropertyDownwards(int index, boolean include, int property) {
+
+        if (include) {
+            setProperty(index, property);
+        }
+
+        int tempIndex = index;
+        for (int i = maxLevels.length - 1; i >= 0; i--) {
+            int state = tempIndex / offsets[i];
+            if (state != 0) {
+                int predecessorIndex = index - offsets[i];
+                if (!hasProperty(predecessorIndex, property)) {
+                    setPropertyDownwards(predecessorIndex, include, property);
+                }
+            }
+            tempIndex -= state * offsets[i];
+        }
+    }
+
     public void setPropertyDownwards(Node node, boolean include, int property) {
-        
+        setPropertyDownwards(node.id, include, property);
+    }
+
+    public void setPropertyUpwards(int index, boolean include, int property) {
+
         if (include) {
-            setProperty(node, property);
+            setProperty(index, property);
         }
 
-        for (final Node down : node.getPredecessors()) {
-            if (!down.hasProperty(property)) {
-                setPropertyDownwards(down, true, property);
+        int tempIndex = index;
+        for (int i = maxLevels.length - 1; i >= 0; i--) {
+            int state = tempIndex / offsets[i];
+            if (state < maxLevels[i]) {
+                int successorIndex = index + offsets[i];
+                if (!hasProperty(successorIndex, property)) {
+                    setPropertyUpwards(successorIndex, include, property);
+                }
             }
+            tempIndex -= state * offsets[i];
         }
     }
 
-    /**
-     * Sets the property to all successors of the given node.
-     *
-     * @param node the node
-     * @param include should the property also be set for the starting node
-     * @param property the property
-     */
     public void setPropertyUpwards(Node node, boolean include, int property) {
+        setPropertyUpwards(node.id, include, property);
+    }
 
-        if (include) {
-            setProperty(node, property);
+    public void setTagTrigger(NodeAction trigger) {
+        tagTrigger = trigger;
+    }
+
+    private int getIndex(int[] transformation) {
+        int index = 0;
+        for (int i = 0; i < transformation.length; i++) {
+            index += offsets[i] * transformation[i];
         }
-        
-        for (final Node up : node.getSuccessors()) {
-            if (!up.hasProperty(property)) {
-                setPropertyUpwards(up, true, property);
+        return index;
+    }
+
+    private int getLevel(final int[] transformation) {
+        // Return the sum of transformation's components
+        int sum = 0;
+        for (int a : transformation) {
+            sum += a;
+        }
+        return sum;
+    }
+
+    private Node getNode(int index) {
+        Node node = new Node(this, index);
+        return node;
+    }
+
+    private int[] getPredecessors(final int index) {
+        int[] predessors = new int[maxLevels.length];
+
+        int tempIndex = index;
+        int idx = 0;
+        for (int i = maxLevels.length - 1; i >= 0; i--) {
+            int state = tempIndex / offsets[i];
+            if (state != 0) {
+                int predecessorIndex = index - offsets[i];
+                predessors[idx++] = predecessorIndex;
+            }
+            tempIndex -= state * offsets[i];
+        }
+
+        int[] result = new int[idx];
+        System.arraycopy(predessors, 0, result, 0, idx);
+        return result;
+    }
+
+    private int[] getSuccessors(final int index) {
+        int[] successors = new int[maxLevels.length];
+
+        int tempIndex = index;
+        int idx = 0;
+        for (int i = maxLevels.length - 1; i >= 0; i--) {
+            int state = tempIndex / offsets[i];
+            if (state < maxLevels[i]) {
+                int successorIndex = index + offsets[i];
+                successors[idx++] = successorIndex;
+            }
+            tempIndex -= state * offsets[i];
+        }
+
+        int[] result = new int[idx];
+        System.arraycopy(successors, 0, result, 0, idx);
+        return result;
+    }
+
+    private void setProperty(int index, int property) {
+        nodeProperties[index] |= property;
+    }
+
+    private void triggerTagged(int index, Node node) {
+        if ((listener != null) && !hasProperty(index, Node.PROPERTY_EVENT_FIRED)) {
+            if ((tagTrigger == null) || tagTrigger.appliesTo(node)) {
+                setProperty(index, Node.PROPERTY_EVENT_FIRED);
+                listener.nodeTagged(getSize());
             }
         }
     }
 
-    /**
-     * When this trigger executed, a tagged event will be fired.
-     *
-     * @param trigger
-     */
-    public void setTagTrigger(NodeAction trigger){
-        this.tagTrigger = trigger;
-    }
-
-    /**
-     * Triggers a tagged event at the listener.
-     *
-     * @param node
-     */
     private void triggerTagged(Node node) {
-        if (this.listener != null && !node.hasProperty(Node.PROPERTY_EVENT_FIRED)){
-            if (tagTrigger == null || tagTrigger.appliesTo(node)) {
-                node.setProperty(Node.PROPERTY_EVENT_FIRED);
-                this.listener.nodeTagged(size);
-            }
+        triggerTagged(node.id, node);
+    }
+
+    protected Object getData(int index) {
+        return data.get(index);
+    }
+
+    protected InformationLoss<?> getInformationLoss(int index) {
+        return informationLoss.get(index);
+    }
+
+    protected InformationLoss<?> getLowerBound(int index) {
+        return lowerBound.get(index);
+    }
+
+    protected Node[] getPredecessorsNodes(int index) {
+        int[] predecessors = getPredecessors(index);
+        Node[] predecessorsNodes = new Node[predecessors.length];
+        for (int i = 0; i < predecessors.length; i++) {
+            Node node = getNode(predecessors[i]);
+            predecessorsNodes[i] = node;
         }
+        return predecessorsNodes;
+    }
+
+    protected Node[] getSuccessorsNodes(int index) {
+        int[] successors = getSuccessors(index);
+        Node[] successorNodes = new Node[successors.length];
+        for (int i = 0; i < successors.length; i++) {
+            Node node = getNode(successors[i]);
+            successorNodes[i] = node;
+        }
+        return successorNodes;
+    }
+
+    protected int[] getTransformation(int index) {
+        int[] transformation = new int[maxLevels.length];
+        for (int i = transformation.length - 1; i >= 0; i--) {
+            int state = index / offsets[i];
+            transformation[i] = state;
+            index -= state * offsets[i];
+        }
+        return transformation;
+    }
+
+    protected boolean hasProperty(int index, int property) {
+        return (nodeProperties[index] & property) == property;
+    }
+
+    protected void setData(int index, Object data) {
+        this.data.put(index, data);
     }
 }
