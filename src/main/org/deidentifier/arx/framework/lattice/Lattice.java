@@ -18,6 +18,7 @@
 package org.deidentifier.arx.framework.lattice;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,9 +31,22 @@ public class Lattice {
 
     public static void main(String[] args) {
         int[] height = new int[] { 3, 2, 6 };
+
         Lattice lattice = new Lattice(height);
 
         System.out.println("size: " + lattice.getSize());
+        int index = lattice.getSize() - 4;
+        System.out.println("Index: " + index);
+
+        int[] tranformation = lattice.getTransformation(index);
+        System.out.println(Arrays.toString(tranformation));
+        System.out.println(lattice.getIndex(tranformation));
+
+        int[] state = new int[] { 2, 1, 2 };
+        System.out.println(lattice.getIndex(state));
+
+        System.out.println(Arrays.toString(lattice.getSuccessorsNodes(32)));
+        System.out.println(Arrays.toString(lattice.getPredecessorsNodes(32)));
 
         lattice.setPropertyDownwards(lattice.getSize() - 1, true, Node.PROPERTY_ANONYMOUS);
         for (int i = 0; i < lattice.getSize(); i++) {
@@ -57,6 +71,7 @@ public class Lattice {
     private NodeAction                             tagTrigger = null;
 
     private final int[]                            maxLevels;
+    private final int[]                            basis;
     private final int[]                            offsets;
     private final int[]                            nodeProperties;
     private final Map<Integer, Object>             data;
@@ -65,12 +80,14 @@ public class Lattice {
 
     public Lattice(int[] maxLevels) {
         this.maxLevels = new int[maxLevels.length];
-        offsets = new int[maxLevels.length];
+        this.offsets = new int[maxLevels.length];
+        this.basis = Arrays.copyOf(maxLevels, maxLevels.length);
 
         int size = 1;
-        for (int i = 0; i < maxLevels.length; i++) {
+        for (int i = maxLevels.length - 1; i >= 0; i--) {
             offsets[i] = size;
             size *= maxLevels[i];
+
             this.maxLevels[i] = maxLevels[i] - 1;
         }
         nodeProperties = new int[size];
@@ -186,14 +203,14 @@ public class Lattice {
 
         int tempIndex = index;
         for (int i = maxLevels.length - 1; i >= 0; i--) {
-            int state = tempIndex / offsets[i];
+            int state = tempIndex % basis[i];
             if (state != 0) {
                 int predecessorIndex = index - offsets[i];
                 if (!hasProperty(predecessorIndex, property)) {
                     setPropertyDownwards(predecessorIndex, include, property);
                 }
             }
-            tempIndex -= state * offsets[i];
+            tempIndex /= basis[i];
         }
     }
 
@@ -209,14 +226,14 @@ public class Lattice {
 
         int tempIndex = index;
         for (int i = maxLevels.length - 1; i >= 0; i--) {
-            int state = tempIndex / offsets[i];
+            int state = tempIndex % basis[i];
             if (state < maxLevels[i]) {
                 int successorIndex = index + offsets[i];
                 if (!hasProperty(successorIndex, property)) {
                     setPropertyUpwards(successorIndex, include, property);
                 }
             }
-            tempIndex -= state * offsets[i];
+            tempIndex /= basis[i];
         }
     }
 
@@ -256,12 +273,12 @@ public class Lattice {
         int tempIndex = index;
         int idx = 0;
         for (int i = maxLevels.length - 1; i >= 0; i--) {
-            int state = tempIndex / offsets[i];
+            int state = tempIndex % basis[i];
             if (state != 0) {
                 int predecessorIndex = index - offsets[i];
                 predessors[idx++] = predecessorIndex;
             }
-            tempIndex -= state * offsets[i];
+            tempIndex /= basis[i];
         }
 
         int[] result = new int[idx];
@@ -275,12 +292,12 @@ public class Lattice {
         int tempIndex = index;
         int idx = 0;
         for (int i = maxLevels.length - 1; i >= 0; i--) {
-            int state = tempIndex / offsets[i];
+            int state = tempIndex % basis[i];
             if (state < maxLevels[i]) {
                 int successorIndex = index + offsets[i];
                 successors[idx++] = successorIndex;
             }
-            tempIndex -= state * offsets[i];
+            tempIndex /= basis[i];
         }
 
         int[] result = new int[idx];
@@ -338,14 +355,23 @@ public class Lattice {
     }
 
     protected int[] getTransformation(int index) {
-        int[] transformation = new int[maxLevels.length];
+        int[] transformation = new int[basis.length];
         for (int i = transformation.length - 1; i >= 0; i--) {
-            int state = index / offsets[i];
-            transformation[i] = state;
-            index -= state * offsets[i];
+            transformation[i] = index % basis[i];
+            index /= basis[i];
         }
         return transformation;
     }
+
+    // protected int[] getTransformation(int index) {
+    // int[] transformation = new int[maxLevels.length];
+    // for (int i = transformation.length - 1; i >= 0; i--) {
+    // int state = index / offsets[i];
+    // transformation[i] = state;
+    // index -= state * offsets[i];
+    // }
+    // return transformation;
+    // }
 
     protected boolean hasProperty(int index, int property) {
         return (nodeProperties[index] & property) == property;
