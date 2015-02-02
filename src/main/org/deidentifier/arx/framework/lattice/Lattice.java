@@ -78,10 +78,12 @@ public class Lattice {
     private final Map<Integer, InformationLoss<?>> informationLoss;
     private final Map<Integer, InformationLoss<?>> lowerBound;
 
+    private Node[][]                               levels;
+
     public Lattice(int[] maxLevels) {
         this.maxLevels = new int[maxLevels.length];
-        this.offsets = new int[maxLevels.length];
-        this.basis = Arrays.copyOf(maxLevels, maxLevels.length);
+        offsets = new int[maxLevels.length];
+        basis = Arrays.copyOf(maxLevels, maxLevels.length);
 
         int size = 1;
         for (int i = maxLevels.length - 1; i >= 0; i--) {
@@ -112,8 +114,8 @@ public class Lattice {
             maxLevels[i] = transformation[i] + 1;
         }
         this.maxLevels = new int[maxLevels.length];
-        this.offsets = new int[maxLevels.length];
-        this.basis = Arrays.copyOf(maxLevels, maxLevels.length);
+        offsets = new int[maxLevels.length];
+        basis = Arrays.copyOf(maxLevels, maxLevels.length);
 
         int size = 1;
         for (int i = maxLevels.length - 1; i >= 0; i--) {
@@ -140,8 +142,6 @@ public class Lattice {
     public int getLevel(int index) {
         return getLevel(getTransformation(index));
     }
-
-    private Node[][] levels;
 
     public Node[][] getLevels() {
         if (levels == null) {
@@ -276,14 +276,6 @@ public class Lattice {
         tagTrigger = trigger;
     }
 
-    protected int getIndex(int[] transformation) {
-        int index = 0;
-        for (int i = 0; i < transformation.length; i++) {
-            index += offsets[i] * transformation[i];
-        }
-        return index;
-    }
-
     private int getLevel(final int[] transformation) {
         // Return the sum of transformation's components
         int sum = 0;
@@ -355,6 +347,14 @@ public class Lattice {
 
     protected Object getData(int index) {
         return data.get(index);
+    }
+
+    protected int getIndex(int[] transformation) {
+        int index = 0;
+        for (int i = 0; i < transformation.length; i++) {
+            index += offsets[i] * transformation[i];
+        }
+        return index;
     }
 
     protected InformationLoss<?> getInformationLoss(int index) {

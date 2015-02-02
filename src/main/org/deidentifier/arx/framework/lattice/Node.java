@@ -56,13 +56,13 @@ public class Node {
     private Lattice         lattice                       = null;
     public int              id;
 
-    public Node(Lattice lattice, int index) {
-        this.id = index;
-        this.lattice = lattice;
-    }
-
     public Node(int id) {
         this.id = -1;
+    }
+
+    public Node(Lattice lattice, int index) {
+        id = index;
+        this.lattice = lattice;
     }
 
     /*
@@ -132,13 +132,8 @@ public class Node {
      * @return
      */
 
-    private Node[] precs;
-
     public Node[] getPredecessors() {
-        if (precs == null) {
-            precs = lattice.getPredecessorsNodes(id);
-        }
-        return precs;
+        return lattice.getPredecessorsNodes(id);
     }
 
     /**
@@ -148,13 +143,9 @@ public class Node {
      * @return
      */
 
-    private Node[] succs;
-
     public Node[] getSuccessors() {
-        if (succs == null) {
-            succs = lattice.getSuccessorsNodes(id);
-        }
-        return succs;
+        return lattice.getSuccessorsNodes(id);
+
     }
 
     /**
@@ -173,6 +164,7 @@ public class Node {
      * @see java.lang.Object#hashCode()
      */
 
+    @Override
     public int hashCode() {
         return id;
     }
@@ -202,15 +194,20 @@ public class Node {
      * @param level
      */
     public void setTransformation(int[] transformation, int level) {
-//        throw new UnsupportedOperationException();
+        // throw new UnsupportedOperationException();
         System.out.println("Ugly!");
         int[] maxLevels = new int[transformation.length];
         for (int i = 0; i < maxLevels.length; i++) {
             maxLevels[i] = transformation[i] + 1;
         }
-        
+
         lattice = new Lattice(maxLevels);
-        this.id = lattice.getIndex(transformation);
+        id = lattice.getIndex(transformation);
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(getTransformation());
     }
 
     protected void addPredecessor(Node node) {
@@ -247,11 +244,6 @@ public class Node {
 
     void builderAddSuccessor(Node successor) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String toString() {
-        return Arrays.toString(getTransformation());
     }
 
 }
