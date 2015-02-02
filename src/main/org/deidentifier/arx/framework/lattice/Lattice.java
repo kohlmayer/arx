@@ -127,10 +127,7 @@ public class Lattice {
         data = new HashMap<Integer, Object>();
         informationLoss = new HashMap<Integer, InformationLoss<?>>();
         lowerBound = new HashMap<Integer, InformationLoss<?>>();
-        
-        
 
-        
         // throw new UnsupportedOperationException();
         System.out.println("Ugly!");
 
@@ -144,29 +141,35 @@ public class Lattice {
         return getLevel(getTransformation(index));
     }
 
+    private Node[][] levels;
+
     public Node[][] getLevels() {
-        // Prepare
-        int height = getTop().getLevel() + 1;
-        @SuppressWarnings("unchecked")
-        List<Node>[] levels = new List[height];
-        for (int i = 0; i < levels.length; i++) {
-            levels[i] = new ArrayList<Node>();
-        }
+        if (levels == null) {
 
-        // Add
-        for (int i = 0; i < nodeProperties.length; i++) {
-            Node node = getNode(i);
-            levels[node.getLevel()].add(node);
-        }
+            // Prepare
+            int height = getTop().getLevel() + 1;
+            @SuppressWarnings("unchecked")
+            List<Node>[] levels = new List[height];
+            for (int i = 0; i < levels.length; i++) {
+                levels[i] = new ArrayList<Node>();
+            }
 
-        // Pack
-        Node[][] result = new Node[levels.length][];
-        for (int i = 0; i < levels.length; i++) {
-            result[i] = levels[i].toArray(new Node[levels[i].size()]);
+            // Add
+            for (int i = 0; i < nodeProperties.length; i++) {
+                Node node = getNode(i);
+                levels[node.getLevel()].add(node);
+            }
+
+            // Pack
+            Node[][] result = new Node[levels.length][];
+            for (int i = 0; i < levels.length; i++) {
+                result[i] = levels[i].toArray(new Node[levels[i].size()]);
+            }
+            this.levels = result;
         }
 
         // Return
-        return result;
+        return levels;
     }
 
     public int getSize() {
