@@ -17,8 +17,6 @@
 
 package org.deidentifier.arx.framework.check;
 
-import java.util.Arrays;
-
 import org.deidentifier.arx.ARXConfiguration;
 import org.deidentifier.arx.ARXConfiguration.ARXConfigurationInternal;
 import org.deidentifier.arx.framework.check.StateMachine.Transition;
@@ -276,7 +274,7 @@ public class NodeChecker implements INodeChecker {
         }
         
         // Set properties
-        Lattice lattice = new Lattice(new Node[][]{{transformation}}, 0);
+        Lattice lattice = transformation.getLattice();
         lattice.setChecked(transformation, new Result(currentGroupify.isAnonymous(), 
                                                       currentGroupify.isKAnonymous(),
                                                       loss,

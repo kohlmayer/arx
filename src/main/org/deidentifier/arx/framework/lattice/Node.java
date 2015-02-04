@@ -60,9 +60,9 @@ public class Node {
 
     private Node[]          succ;
 
-    public Node(int id) {
-        this.id = -1;
-    }
+//    public Node(int id) {
+//        this.id = -1;
+//    }
 
     public Node(Lattice lattice, int index) {
         id = index;
@@ -252,6 +252,10 @@ public class Node {
 
     void builderAddSuccessor(Node successor) {
         throw new UnsupportedOperationException();
+    }
+
+    public Lattice getLattice() {
+        return lattice;
     }
 
 }

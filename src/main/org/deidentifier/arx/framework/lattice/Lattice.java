@@ -140,21 +140,54 @@ public class Lattice {
 
     }
 
-    public Lattice(Node[][] nodes, int levels) {
-        // TODO: implement correctly
+    // public Lattice(Node[][] nodes, int levels) {
+    // // TODO: implement correctly
+    //
+    // Node node = null;
+    // for (int j = 0; j < nodes.length; j++) {
+    // Node[] level = nodes[j];
+    // for (int k = 0; k < level.length; k++) {
+    // node = level[k];
+    // }
+    // }
+    // int[] transformation = node.getTransformation();
+    // int[] maxLevels = new int[transformation.length];
+    // for (int i = 0; i < maxLevels.length; i++) {
+    // maxLevels[i] = transformation[i] + 1;
+    // }
+    // this.maxLevels = new int[maxLevels.length];
+    // offsets = new int[maxLevels.length];
+    // basis = Arrays.copyOf(maxLevels, maxLevels.length);
+    //
+    // int temp = 0;
+    // int size = 1;
+    // for (int i = maxLevels.length - 1; i >= 0; i--) {
+    // offsets[i] = size;
+    // size *= maxLevels[i];
+    // this.maxLevels[i] = maxLevels[i] - 1;
+    // temp += this.maxLevels[i];
+    // }
+    // nodeProperties = new int[size];
+    // height = temp + 1;
+    //
+    // data = new HashMap<Integer, Object>();
+    // informationLoss = new HashMap<Integer, InformationLoss<?>>();
+    // lowerBound = new HashMap<Integer, InformationLoss<?>>();
+    //
+    // // create levels
+    // this.levels = createLevels();
+    //
+    // // throw new UnsupportedOperationException();
+    // System.out.println("Ugly!");
+    //
+    // }
 
-        Node node = null;
-        for (int j = 0; j < nodes.length; j++) {
-            Node[] level = nodes[j];
-            for (int k = 0; k < level.length; k++) {
-                node = level[k];
-            }
-        }
-        int[] transformation = node.getTransformation();
-        int[] maxLevels = new int[transformation.length];
+    public Lattice(int[] transformation, boolean b) {
+        int[] maxLevels = Arrays.copyOf(transformation, transformation.length);
         for (int i = 0; i < maxLevels.length; i++) {
-            maxLevels[i] = transformation[i] + 1;
+            maxLevels[i] = maxLevels[i] + 1;
         }
+
         this.maxLevels = new int[maxLevels.length];
         offsets = new int[maxLevels.length];
         basis = Arrays.copyOf(maxLevels, maxLevels.length);
@@ -175,10 +208,7 @@ public class Lattice {
         lowerBound = new HashMap<Integer, InformationLoss<?>>();
 
         // create levels
-        this.levels = createLevels();
-
-        // throw new UnsupportedOperationException();
-        System.out.println("Ugly!");
+        levels = createLevels();
 
     }
 
@@ -209,6 +239,15 @@ public class Lattice {
 
         // Return
         return nodeLevels;
+    }
+
+    public Node getNode(int index) {
+        Node node = new Node(this, index);
+        return node;
+    }
+
+    public Node getNode(int[] transformation) {
+        return getNode(getIndex(transformation));
     }
 
     public int getSize() {
@@ -353,11 +392,6 @@ public class Lattice {
         return sum;
     }
 
-    private Node getNode(int index) {
-        Node node = new Node(this, index);
-        return node;
-    }
-
     private int[] getPredecessors(final int index) {
         int[] predessors = new int[maxLevels.length];
 
@@ -469,4 +503,5 @@ public class Lattice {
     protected void setData(int index, Object data) {
         this.data.put(index, data);
     }
+
 }

@@ -24,6 +24,7 @@ import org.deidentifier.arx.framework.check.NodeChecker;
 import org.deidentifier.arx.framework.check.TransformedData;
 import org.deidentifier.arx.framework.data.DataManager;
 import org.deidentifier.arx.framework.data.Dictionary;
+import org.deidentifier.arx.framework.lattice.Lattice;
 import org.deidentifier.arx.framework.lattice.Node;
 import org.deidentifier.arx.metric.Metric;
 
@@ -79,19 +80,19 @@ public class ARXResult {
      * @param optimum
      * @param time
      */
-    public ARXResult(       final DataHandle handle,
-                            final DataDefinition definition,
-                            final ARXLattice lattice,
-                            final int historySize,
-                            final double snapshotSizeSnapshot,
-                            final double snapshotSizeDataset,
-                            final Metric<?> metric,
-                            final ARXConfiguration config,
-                            final ARXNode optimum,
-                            final long time) {
+    public ARXResult(final DataHandle handle,
+                     final DataDefinition definition,
+                     final ARXLattice lattice,
+                     final int historySize,
+                     final double snapshotSizeSnapshot,
+                     final double snapshotSizeDataset,
+                     final Metric<?> metric,
+                     final ARXConfiguration config,
+                     final ARXNode optimum,
+                     final long time) {
 
         // Set registry and definition
-        ((DataHandleInput)handle).setDefinition(definition);
+        ((DataHandleInput) handle).setDefinition(definition);
         handle.getRegistry().createInputSubset(config);
 
         // Set optimum in lattice
@@ -108,13 +109,13 @@ public class ARXResult {
                                                     config.getCriteria());
 
         // Update handle
-        ((DataHandleInput)handle).update(manager.getDataQI().getArray(), 
-                                         manager.getDataSE().getArray(),
-                                         manager.getDataIS().getArray());
-        
+        ((DataHandleInput) handle).update(manager.getDataQI().getArray(),
+                                          manager.getDataSE().getArray(),
+                                          manager.getDataIS().getArray());
+
         // Lock handle
-        ((DataHandleInput)handle).setLocked(true);
-        
+        ((DataHandleInput) handle).setLocked(true);
+
         // Initialize
         config.initialize(manager);
 
@@ -139,8 +140,7 @@ public class ARXResult {
         this.optimalNode = lattice.getOptimum();
         this.duration = time;
     }
-    
-    
+
     /**
      * Creates a new instance.
      *
@@ -189,21 +189,23 @@ public class ARXResult {
     }
 
     /**
-     * Returns a handle to the data obtained by applying the optimal transformation. This method will not copy the buffer, 
-     * i.e., only one instance can be obtained for each transformation. All previous handles for output data will be invalidated when a new handle is 
+     * Returns a handle to the data obtained by applying the optimal transformation. This method will not copy the buffer,
+     * i.e., only one instance can be obtained for each transformation. All previous handles for output data will be invalidated when a new handle is
      * obtained. Use this only if you know exactly what you are doing.
      * 
      * @return
      */
     @Deprecated
     public DataHandle getHandle() {
-        if (optimalNode == null) { return null; }
+        if (optimalNode == null) {
+            return null;
+        }
         return getOutput(optimalNode, false);
     }
 
     /**
-     * Returns a handle to data obtained by applying the given transformation. This method will not copy the buffer, 
-     * i.e., only one instance can be obtained for each transformation. All previous handles for output data will be invalidated when a new handle is 
+     * Returns a handle to data obtained by applying the given transformation. This method will not copy the buffer,
+     * i.e., only one instance can be obtained for each transformation. All previous handles for output data will be invalidated when a new handle is
      * obtained. Use this only if you know exactly what you are doing.
      * @param node the transformation
      * 
@@ -213,7 +215,7 @@ public class ARXResult {
     public DataHandle getHandle(ARXNode node) {
         return getOutput(node, false);
     }
-    
+
     /**
      * Returns the lattice.
      *
@@ -222,21 +224,23 @@ public class ARXResult {
     public ARXLattice getLattice() {
         return lattice;
     }
-    
+
     /**
-     * Returns a handle to the data obtained by applying the optimal transformation. This method will fork the buffer, 
+     * Returns a handle to the data obtained by applying the optimal transformation. This method will fork the buffer,
      * allowing to obtain multiple handles to different representations of the data set. Note that only one instance can
      * be obtained for each transformation.
      * 
      * @return
      */
     public DataHandle getOutput() {
-        if (optimalNode == null) { return null; }
+        if (optimalNode == null) {
+            return null;
+        }
         return getOutput(optimalNode, true);
     }
-    
+
     /**
-     * Returns a handle to data obtained by applying the given transformation.  This method will fork the buffer, 
+     * Returns a handle to data obtained by applying the given transformation. This method will fork the buffer,
      * allowing to obtain multiple handles to different representations of the data set. Note that only one instance can
      * be obtained for each transformation.
      * 
@@ -247,20 +251,20 @@ public class ARXResult {
     public DataHandle getOutput(ARXNode node) {
         return getOutput(node, true);
     }
-    
+
     /**
      * Returns a handle to data obtained by applying the given transformation. This method allows controlling whether
      * the underlying buffer is copied or not. Setting the flag to true will fork the buffer for every handle, allowing to
      * obtain multiple handles to different representations of the data set. When setting the flag to false, all previous
      * handles for output data will be invalidated when a new handle is obtained.
-     *  
+     * 
      * @param node the transformation
      * @param fork Set this flag to false, only if you know exactly what you are doing.
      * 
      * @return
      */
     public DataHandle getOutput(ARXNode node, boolean fork) {
-        
+
         // Check lock
         if (fork && bufferLockedByHandle != null) {
             throw new RuntimeException("The buffer is currently locked by another handle");
@@ -276,20 +280,22 @@ public class ARXResult {
                 bufferLockedByNode = null;
             }
         }
-        
+
         DataHandle handle = registry.getOutputHandle(node);
         if (handle != null) return handle;
 
-        final Node transformation = new Node(0);
-        int level = 0; for (int i : node.getTransformation()) level+= i;
-        transformation.setTransformation(node.getTransformation(), level);
- 
+        Lattice nLattice = new Lattice(node.getTransformation(), true);
+        final Node transformation = nLattice.getNode(node.getTransformation());
+
+        // int level = 0; for (int i : node.getTransformation()) level+= i;
+        // transformation.setTransformation(node.getTransformation(), level);
+
         // Apply the transformation
         TransformedData information = checker.applyAndSetProperties(transformation);
 
         // Store
         if (!node.isChecked() || node.getMaximumInformationLoss().compareTo(node.getMinimumInformationLoss()) != 0) {
-            
+
             node.access().setChecked(true);
             if (transformation.hasProperty(Node.PROPERTY_ANONYMOUS)) {
                 node.access().setAnonymous();
@@ -301,10 +307,10 @@ public class ARXResult {
             node.access().setLowerBound(transformation.getLowerBound());
             lattice.estimateInformationLoss();
         }
-        
+
         // Clone if needed
         if (fork) {
-            information.buffer = information.buffer.clone(); 
+            information.buffer = information.buffer.clone();
         }
 
         // Create
@@ -316,13 +322,13 @@ public class ARXResult {
                                                        new StatisticsEquivalenceClasses(information.statistics),
                                                        definition,
                                                        config);
-        
+
         // Lock
         if (!fork) {
-            bufferLockedByHandle = result; 
+            bufferLockedByHandle = result;
             bufferLockedByNode = node;
         }
-        
+
         // Return
         return result;
     }
@@ -332,13 +338,15 @@ public class ARXResult {
      * the underlying buffer is copied or not. Setting the flag to true will fork the buffer for every handle, allowing to
      * obtain multiple handles to different representations of the data set. When setting the flag to false, all previous
      * handles for output data will be invalidated when a new handle is obtained.
-     *  
+     * 
      * @param fork Set this flag to false, only if you know exactly what you are doing.
      * 
      * @return
      */
     public DataHandle getOutput(boolean fork) {
-        if (optimalNode == null) { return null; }
+        if (optimalNode == null) {
+            return null;
+        }
         return getOutput(optimalNode, fork);
     }
 
