@@ -84,20 +84,7 @@ public class Lattice {
         System.out.println("base: " + Arrays.toString(lattice.basis));
         System.out.println("offsets: " + Arrays.toString(lattice.offsets));
 
-        // Node[][] levels = lattice.getLevels();
-        // for (int i = 0; i < levels.length; i++) {
-        // Node[] level = levels[i];
-        // for (int j = 0; j < level.length; j++) {
-        // System.out.print(level[j].id);
-        // if (j < level.length - 1) {
-        // System.out.print("-");
-        // }
-        // }
-        // System.out.println();
-        // }
-
         int cnt = 0;
-
         Iterator<Node> iterator = lattice.iterator();
         while (iterator.hasNext()) {
             Node node = iterator.next();
@@ -106,32 +93,6 @@ public class Lattice {
             cnt++;
         }
         System.out.println(cnt);
-
-        // int index = lattice.getSize() - 4;
-        // System.out.println("Index: " + index);
-        // int[] tranformation = lattice.getTransformation(index);
-        // System.out.println(Arrays.toString(tranformation));
-        // System.out.println(lattice.getIndex(tranformation));
-        //
-        // int[] state = new int[] { 2, 1, 2 };
-        // System.out.println(lattice.getIndex(state));
-        //
-        // System.out.println(Arrays.toString(lattice.getSuccessorsNodes(32)));
-        // System.out.println(Arrays.toString(lattice.getPredecessorsNodes(32)));
-        //
-        // lattice.setPropertyDownwards(lattice.getSize() - 1, true, Node.PROPERTY_ANONYMOUS);
-        // for (int i = 0; i < lattice.getSize(); i++) {
-        // if (!lattice.hasProperty(i, Node.PROPERTY_ANONYMOUS)) {
-        // System.out.println("UOPS");
-        // }
-        // }
-        //
-        // lattice.setPropertyUpwards(0, true, Node.PROPERTY_EVENT_FIRED);
-        // for (int i = 0; i < lattice.getSize(); i++) {
-        // if (!lattice.hasProperty(i, Node.PROPERTY_EVENT_FIRED)) {
-        // System.out.println("UOPS");
-        // }
-        // }
 
     }
 
@@ -249,35 +210,6 @@ public class Lattice {
         // Return
         return nodeLevels;
     }
-
-    // public Node[][] getLevels() {
-    // if (nodeLevels == null) {
-    //
-    // // Prepare
-    // int height = getTop().getLevel() + 1;
-    // @SuppressWarnings("unchecked")
-    // List<Node>[] levels = new List[height];
-    // for (int i = 0; i < levels.length; i++) {
-    // levels[i] = new ArrayList<Node>();
-    // }
-    //
-    // // Add
-    // for (int i = 0; i < nodeProperties.length; i++) {
-    // Node node = getNode(i);
-    // levels[node.getLevel()].add(node);
-    // }
-    //
-    // // Pack
-    // Node[][] result = new Node[levels.length][];
-    // for (int i = 0; i < levels.length; i++) {
-    // result[i] = levels[i].toArray(new Node[levels[i].size()]);
-    // }
-    // nodeLevels = result;
-    // }
-    //
-    // // Return
-    // return nodeLevels;
-    // }
 
     public int getSize() {
         return nodeProperties.length;
@@ -510,16 +442,6 @@ public class Lattice {
         }
         return predecessorsNodes;
     }
-
-    // protected int[] getTransformation(int index) {
-    // int[] transformation = new int[maxLevels.length];
-    // for (int i = transformation.length - 1; i >= 0; i--) {
-    // int state = index / offsets[i];
-    // transformation[i] = state;
-    // index -= state * offsets[i];
-    // }
-    // return transformation;
-    // }
 
     protected Node[] getSuccessorsNodes(int index) {
         int[] successors = getSuccessors(index);
