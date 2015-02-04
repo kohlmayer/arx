@@ -62,7 +62,7 @@ public class FLASHStrategy implements Comparator<Node> {
         for (int i = 0; i < hier.length; i++) {
             distinct[i] = hier[i].getDistinctValues();
         }
-        maxlevel = lattice.getLevels().length - 1;
+        maxlevel = lattice.getHeight() - 1;
         values = new double[lattice.getSize()][];
     }
 

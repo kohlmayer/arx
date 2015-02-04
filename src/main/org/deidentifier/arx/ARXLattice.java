@@ -733,8 +733,8 @@ public class ARXLattice implements Serializable {
         // Create nodes
         final Map<Node, ARXNode> map = new HashMap<Node, ARXNode>();
         size = lattice.getSize();
-        levels = new ARXNode[lattice.getLevels().length][];
-        for (int i = 0; i < lattice.getLevels().length; i++) {
+        levels = new ARXNode[lattice.getHeight()][];
+        for (int i = 0; i < lattice.getHeight(); i++) {
             final Node[] level = lattice.getLevels()[i];
             levels[i] = new ARXNode[level.length];
             for (int j = 0; j < level.length; j++) {
