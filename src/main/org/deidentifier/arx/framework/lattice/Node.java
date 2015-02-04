@@ -56,6 +56,10 @@ public class Node {
     private Lattice         lattice                       = null;
     public int              id;
 
+    private Node[]          prec;
+
+    private Node[]          succ;
+
     public Node(int id) {
         this.id = -1;
     }
@@ -131,9 +135,11 @@ public class Node {
      * @param materialize
      * @return
      */
-
     public Node[] getPredecessors() {
-        return lattice.getPredecessorsNodes(id);
+        if (prec == null) {
+            prec = lattice.getPredecessorsNodes(id);
+        }
+        return prec;
     }
 
     /**
@@ -142,9 +148,11 @@ public class Node {
      * @param materialize
      * @return
      */
-
     public Node[] getSuccessors() {
-        return lattice.getSuccessorsNodes(id);
+        if (succ == null) {
+            succ = lattice.getSuccessorsNodes(id);
+        }
+        return succ;
 
     }
 
