@@ -19,14 +19,14 @@ package org.deidentifier.arx.framework.lattice;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.deidentifier.arx.ARXListener;
 import org.deidentifier.arx.framework.check.INodeChecker;
 import org.deidentifier.arx.metric.InformationLoss;
+
+import com.carrotsearch.hppc.IntObjectOpenHashMap;
 
 public class Lattice {
 
@@ -97,21 +97,21 @@ public class Lattice {
     }
 
     /** A listener */
-    private ARXListener                            listener   = null;
+    private ARXListener                                    listener   = null;
 
     /** Tag trigger */
-    private NodeAction                             tagTrigger = null;
-    private final int[]                            maxLevels;
-    private final int[]                            basis;
-    private final int[]                            offsets;
-    private final int[]                            nodeProperties;
-    private final int                              height;
-    private final Map<Integer, Object>             data;
-    private final Map<Integer, InformationLoss<?>> informationLoss;
+    private NodeAction                                     tagTrigger = null;
+    private final int[]                                    maxLevels;
+    private final int[]                                    basis;
+    private final int[]                                    offsets;
+    private final int[]                                    nodeProperties;
+    private final int                                      height;
+    private final IntObjectOpenHashMap<Object>             data;
+    private final IntObjectOpenHashMap<InformationLoss<?>> informationLoss;
 
-    private final Map<Integer, InformationLoss<?>> lowerBound;
+    private final IntObjectOpenHashMap<InformationLoss<?>> lowerBound;
 
-    private final int[][]                          levels;
+    private final int[][]                                  levels;
 
     // Node[][] nodeLevels = null;
 
@@ -131,9 +131,9 @@ public class Lattice {
         nodeProperties = new int[size];
         height = temp + 1;
 
-        data = new HashMap<Integer, Object>();
-        informationLoss = new HashMap<Integer, InformationLoss<?>>();
-        lowerBound = new HashMap<Integer, InformationLoss<?>>();
+        data = new IntObjectOpenHashMap<Object>();
+        informationLoss = new IntObjectOpenHashMap<InformationLoss<?>>();
+        lowerBound = new IntObjectOpenHashMap<InformationLoss<?>>();
 
         // create levels
         levels = createLevels();
@@ -204,9 +204,9 @@ public class Lattice {
         nodeProperties = new int[size];
         height = temp + 1;
 
-        data = new HashMap<Integer, Object>();
-        informationLoss = new HashMap<Integer, InformationLoss<?>>();
-        lowerBound = new HashMap<Integer, InformationLoss<?>>();
+        data = new IntObjectOpenHashMap<Object>();
+        informationLoss = new IntObjectOpenHashMap<InformationLoss<?>>();
+        lowerBound = new IntObjectOpenHashMap<InformationLoss<?>>();
 
         // create levels
         levels = createLevels();
