@@ -735,7 +735,7 @@ public class ARXLattice implements Serializable {
         size = lattice.getSize();
         levels = new ARXNode[lattice.getHeight()][];
         for (int i = 0; i < lattice.getHeight(); i++) {
-            final Node[] level = lattice.getLevels()[i];
+            final Node[] level = lattice.getAllNodesOnLevel(i);
             levels[i] = new ARXNode[level.length];
             for (int j = 0; j < level.length; j++) {
                 final ARXNode node = new ARXNode(level[j], headermap);
@@ -748,17 +748,16 @@ public class ARXLattice implements Serializable {
         }
 
         // Create relationships
-        for (final Node[] level : lattice.getLevels()) {
-            for (final Node node : level) {
-                final ARXNode fnode = map.get(node);
-                fnode.successors = new ARXNode[node.getSuccessors().length];
-                fnode.predecessors = new ARXNode[node.getPredecessors().length];
-                for (int i = 0; i < node.getSuccessors().length; i++) {
-                    fnode.successors[i] = map.get(node.getSuccessors()[i]);
-                }
-                for (int i = 0; i < node.getPredecessors().length; i++) {
-                    fnode.predecessors[i] = map.get(node.getPredecessors()[i]);
-                }
+        for (int j = 0; j < lattice.getSize(); j++) {
+            Node node = lattice.getNode(j);
+            final ARXNode fnode = map.get(node);
+            fnode.successors = new ARXNode[node.getSuccessors().length];
+            fnode.predecessors = new ARXNode[node.getPredecessors().length];
+            for (int i = 0; i < node.getSuccessors().length; i++) {
+                fnode.successors[i] = map.get(node.getSuccessors()[i]);
+            }
+            for (int i = 0; i < node.getPredecessors().length; i++) {
+                fnode.predecessors[i] = map.get(node.getPredecessors()[i]);
             }
         }
 

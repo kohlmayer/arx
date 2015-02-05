@@ -279,25 +279,21 @@ public class FLASHAlgorithmImpl extends AbstractAlgorithm {
      * @param triggerSkip The trigger to be used for limiting the number of nodes to be sorted
      * @return A sorted array of nodes remaining on this level
      */
-
     private Node[] getUnsetNodesAndSort(int level, NodeAction triggerSkip) {
 
-//        // Create
-//        List<Node> result = new ArrayList<Node>();
-//        Node[] nlevel = lattice.getLevels()[level];
-//        for (Node n : nlevel) {
-//            if (!skip(triggerSkip, n)) {
-//                result.add(n);
-//            }
-//        }
-//
-//        // Sort
-//        Node[] resultArray = result.toArray(new Node[result.size()]);
-//        sort(resultArray);
-//        return resultArray;
-        Node[] nlevel = lattice.getLevels()[level];
-        sort(nlevel);
-        return nlevel; 
+        // Create
+        List<Node> result = new ArrayList<Node>();
+        Node[] nlevel = lattice.getAllNodesOnLevel(level);
+        for (Node n : nlevel) {
+            if (!skip(triggerSkip, n)) {
+                result.add(n);
+            }
+        }
+
+        // Sort
+        Node[] resultArray = result.toArray(new Node[result.size()]);
+        sort(resultArray);
+        return resultArray;
     }
 
     /**

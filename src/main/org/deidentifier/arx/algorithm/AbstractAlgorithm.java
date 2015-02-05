@@ -67,11 +67,10 @@ public abstract class AbstractAlgorithm {
      */
     public List<Node> getAllAnonymousNodes() {
         final ArrayList<Node> results = new ArrayList<Node>();
-        for (final Node[] level : lattice.getLevels()) {
-            for (final Node n : level) {
-                if (n.hasProperty(Node.PROPERTY_ANONYMOUS)) {
-                    results.add(n);
-                }
+        final int latticeSize = lattice.getSize();
+        for (int i = 0; i < latticeSize; i++) {
+            if (lattice.hasProperty(i, Node.PROPERTY_ANONYMOUS)) {
+                results.add(lattice.getNode(i));
             }
         }
         return results;

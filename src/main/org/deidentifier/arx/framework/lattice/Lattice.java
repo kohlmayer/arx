@@ -113,7 +113,7 @@ public class Lattice {
 
     private final int[][]                          levels;
 
-    Node[][]                                       nodeLevels = null;
+    // Node[][] nodeLevels = null;
 
     public Lattice(int[] maxLevels) {
         this.maxLevels = new int[maxLevels.length];
@@ -182,6 +182,7 @@ public class Lattice {
     //
     // }
 
+    // TODO: implement more efficiently [use only one constructor with minlevel and maxlevel]
     public Lattice(int[] transformation, boolean b) {
         int[] maxLevels = Arrays.copyOf(transformation, transformation.length);
         for (int i = 0; i < maxLevels.length; i++) {
@@ -220,26 +221,49 @@ public class Lattice {
         return height;
     }
 
-    public int getLevel(int index) {
+    protected int getLevel(int index) {
         return getLevel(getTransformation(index));
     }
 
-    public Node[][] getLevels() {
+    public Node[] getUnsetNodesOnLevel(int level, int property) {
+        int[] ilevel = levels[level];
+        List<Node> result = new ArrayList<Node>();
 
-        if (nodeLevels == null) {
-            Node[][] levels = new Node[this.levels.length][];
-            for (int i = 0; i < levels.length; i++) {
-                levels[i] = new Node[this.levels[i].length];
-                for (int j = 0; j < levels[i].length; j++) {
-                    levels[i][j] = getNode(this.levels[i][j]);
-                }
+        for (int i = 0; i < ilevel.length; i++) {
+            int nodeIndex = ilevel[i];
+            if (!hasProperty(nodeIndex, property)) {
+                result.add(getNode(nodeIndex));
             }
-            nodeLevels = levels;
         }
 
-        // Return
-        return nodeLevels;
+        Node[] resultArray = result.toArray(new Node[result.size()]);
+        return resultArray;
     }
+
+    public Node[] getAllNodesOnLevel(int level) {
+        Node[] nlevel = new Node[levels[level].length];
+        for (int i = 0; i < nlevel.length; i++) {
+            nlevel[i] = getNode(levels[level][i]);
+        }
+        return nlevel;
+    }
+
+    // public Node[][] getLevels() {
+    //
+    // if (nodeLevels == null) {
+    // Node[][] levels = new Node[this.levels.length][];
+    // for (int i = 0; i < levels.length; i++) {
+    // levels[i] = new Node[this.levels[i].length];
+    // for (int j = 0; j < levels[i].length; j++) {
+    // levels[i][j] = getNode(this.levels[i][j]);
+    // }
+    // }
+    // nodeLevels = levels;
+    // }
+    //
+    // // Return
+    // return nodeLevels;
+    // }
 
     public Node getNode(int index) {
         Node node = new Node(this, index);
@@ -496,7 +520,7 @@ public class Lattice {
         return transformation;
     }
 
-    protected boolean hasProperty(int index, int property) {
+    public boolean hasProperty(int index, int property) {
         return (nodeProperties[index] & property) == property;
     }
 
