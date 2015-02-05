@@ -213,6 +213,14 @@ public class Lattice {
 
     }
 
+    public Node[] getAllNodesOnLevel(int level) {
+        Node[] nlevel = new Node[levels[level].length];
+        for (int i = 0; i < nlevel.length; i++) {
+            nlevel[i] = getNode(levels[level][i]);
+        }
+        return nlevel;
+    }
+
     public Node getBottom() {
         return getNode(0);
     }
@@ -221,31 +229,13 @@ public class Lattice {
         return height;
     }
 
-    protected int getLevel(int index) {
-        return getLevel(getTransformation(index));
+    public Node getNode(int index) {
+        Node node = new Node(this, index);
+        return node;
     }
 
-    public Node[] getUnsetNodesOnLevel(int level, int property) {
-        int[] ilevel = levels[level];
-        List<Node> result = new ArrayList<Node>();
-
-        for (int i = 0; i < ilevel.length; i++) {
-            int nodeIndex = ilevel[i];
-            if (!hasProperty(nodeIndex, property)) {
-                result.add(getNode(nodeIndex));
-            }
-        }
-
-        Node[] resultArray = result.toArray(new Node[result.size()]);
-        return resultArray;
-    }
-
-    public Node[] getAllNodesOnLevel(int level) {
-        Node[] nlevel = new Node[levels[level].length];
-        for (int i = 0; i < nlevel.length; i++) {
-            nlevel[i] = getNode(levels[level][i]);
-        }
-        return nlevel;
+    public Node getNode(int[] transformation) {
+        return getNode(getIndex(transformation));
     }
 
     // public Node[][] getLevels() {
@@ -265,21 +255,31 @@ public class Lattice {
     // return nodeLevels;
     // }
 
-    public Node getNode(int index) {
-        Node node = new Node(this, index);
-        return node;
-    }
-
-    public Node getNode(int[] transformation) {
-        return getNode(getIndex(transformation));
-    }
-
     public int getSize() {
         return nodeProperties.length;
     }
 
     public Node getTop() {
         return getNode(getSize() - 1);
+    }
+
+    public Node[] getUnsetNodesOnLevel(int level, int property) {
+        int[] ilevel = levels[level];
+        List<Node> result = new ArrayList<Node>();
+
+        for (int i = 0; i < ilevel.length; i++) {
+            int nodeIndex = ilevel[i];
+            if (!hasProperty(nodeIndex, property)) {
+                result.add(getNode(nodeIndex));
+            }
+        }
+
+        Node[] resultArray = result.toArray(new Node[result.size()]);
+        return resultArray;
+    }
+
+    public boolean hasProperty(int index, int property) {
+        return (nodeProperties[index] & property) == property;
     }
 
     public Iterator<Node> iterator() {
@@ -308,12 +308,18 @@ public class Lattice {
         }
 
         // Infoloss
-        informationLoss.put(index, result.informationLoss);
-        lowerBound.put(index, result.lowerBound);
+        if (result.informationLoss != null) {
+            informationLoss.put(index, result.informationLoss);
+        }
+        if (result.lowerBound != null) {
+            lowerBound.put(index, result.lowerBound);
+        }
     }
 
     public void setInformationLoss(Node node, InformationLoss<?> informationLoss) {
-        this.informationLoss.put(node.id, informationLoss);
+        if (informationLoss != null) {
+            this.informationLoss.put(node.id, informationLoss);
+        }
     }
 
     public void setListener(final ARXListener listener) {
@@ -321,7 +327,9 @@ public class Lattice {
     }
 
     public void setLowerBound(Node node, InformationLoss<?> lowerBound) {
-        this.lowerBound.put(node.id, lowerBound);
+        if (lowerBound != null) {
+            this.lowerBound.put(node.id, lowerBound);
+        }
     }
 
     public void setProperty(Node node, int property) {
@@ -487,6 +495,10 @@ public class Lattice {
         return informationLoss.get(index);
     }
 
+    protected int getLevel(int index) {
+        return getLevel(getTransformation(index));
+    }
+
     protected InformationLoss<?> getLowerBound(int index) {
         return lowerBound.get(index);
     }
@@ -518,10 +530,6 @@ public class Lattice {
             index /= basis[i];
         }
         return transformation;
-    }
-
-    public boolean hasProperty(int index, int property) {
-        return (nodeProperties[index] & property) == property;
     }
 
     protected void setData(int index, Object data) {
