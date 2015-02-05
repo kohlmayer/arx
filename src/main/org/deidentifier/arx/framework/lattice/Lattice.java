@@ -113,8 +113,6 @@ public class Lattice {
 
     private final int[][]                                  levels;
 
-    // Node[][] nodeLevels = null;
-
     public Lattice(int[] maxLevels) {
         this.maxLevels = new int[maxLevels.length];
         offsets = new int[maxLevels.length];
@@ -139,48 +137,6 @@ public class Lattice {
         levels = createLevels();
 
     }
-
-    // public Lattice(Node[][] nodes, int levels) {
-    // // TODO: implement correctly
-    //
-    // Node node = null;
-    // for (int j = 0; j < nodes.length; j++) {
-    // Node[] level = nodes[j];
-    // for (int k = 0; k < level.length; k++) {
-    // node = level[k];
-    // }
-    // }
-    // int[] transformation = node.getTransformation();
-    // int[] maxLevels = new int[transformation.length];
-    // for (int i = 0; i < maxLevels.length; i++) {
-    // maxLevels[i] = transformation[i] + 1;
-    // }
-    // this.maxLevels = new int[maxLevels.length];
-    // offsets = new int[maxLevels.length];
-    // basis = Arrays.copyOf(maxLevels, maxLevels.length);
-    //
-    // int temp = 0;
-    // int size = 1;
-    // for (int i = maxLevels.length - 1; i >= 0; i--) {
-    // offsets[i] = size;
-    // size *= maxLevels[i];
-    // this.maxLevels[i] = maxLevels[i] - 1;
-    // temp += this.maxLevels[i];
-    // }
-    // nodeProperties = new int[size];
-    // height = temp + 1;
-    //
-    // data = new HashMap<Integer, Object>();
-    // informationLoss = new HashMap<Integer, InformationLoss<?>>();
-    // lowerBound = new HashMap<Integer, InformationLoss<?>>();
-    //
-    // // create levels
-    // this.levels = createLevels();
-    //
-    // // throw new UnsupportedOperationException();
-    // System.out.println("Ugly!");
-    //
-    // }
 
     // TODO: implement more efficiently [use only one constructor with minlevel and maxlevel]
     public Lattice(int[] transformation, boolean b) {
@@ -237,23 +193,6 @@ public class Lattice {
     public Node getNode(int[] transformation) {
         return getNode(getIndex(transformation));
     }
-
-    // public Node[][] getLevels() {
-    //
-    // if (nodeLevels == null) {
-    // Node[][] levels = new Node[this.levels.length][];
-    // for (int i = 0; i < levels.length; i++) {
-    // levels[i] = new Node[this.levels[i].length];
-    // for (int j = 0; j < levels[i].length; j++) {
-    // levels[i][j] = getNode(this.levels[i][j]);
-    // }
-    // }
-    // nodeLevels = levels;
-    // }
-    //
-    // // Return
-    // return nodeLevels;
-    // }
 
     public int getSize() {
         return nodeProperties.length;
