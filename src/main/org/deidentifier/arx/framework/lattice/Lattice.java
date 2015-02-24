@@ -76,23 +76,69 @@ public class Lattice {
     }
 
     public static void main(String[] args) {
-        int[] height = new int[] { 3, 2, 6 };
+        int[] height = new int[] { 3, 2, 6, 2 };
 
         Lattice lattice = new Lattice(height);
+        //
+        // System.out.println("size: " + lattice.getSize());
+        // System.out.println("base: " + Arrays.toString(lattice.basis));
+        // System.out.println("offsets: " + Arrays.toString(lattice.offsets));
+        //
+        // for (int i = 0; i < lattice.levels.length; i++) {
+        // int[] level = lattice.levels[i];
+        // System.out.println();
+        // for (int j = 0; j < level.length; j++) {
+        // System.out.print(level[j]);
+        // if (j < level.length) {
+        // System.out.print("-");
+        // }
+        // }
+        //
+        // }
 
-        System.out.println("size: " + lattice.getSize());
-        System.out.println("base: " + Arrays.toString(lattice.basis));
-        System.out.println("offsets: " + Arrays.toString(lattice.offsets));
+        lattice.level(10, 0);
+        System.out.println("Callcount: " + lattice.cnt);
 
-        int cnt = 0;
-        Iterator<Node> iterator = lattice.iterator();
-        while (iterator.hasNext()) {
-            Node node = iterator.next();
-            System.out.print(node);
-            System.out.print("-");
-            cnt++;
+        // int cnt = 0;
+        // Iterator<Node> iterator = lattice.iterator();
+        // while (iterator.hasNext()) {
+        // Node node = iterator.next();
+        // System.out.print(node);
+        // System.out.print("-");
+        // cnt++;
+        // }
+        // System.out.println(cnt);
+
+    }
+
+    private int[] sum;
+    int           cnt = 0;
+
+    private void level(int bugdet, int counter) {
+        cnt++;
+
+        if (counter == sum.length || counter > sum.length - 1) {
+            if (bugdet == 1) {
+                boolean solution = true;
+                for (int i = 0; i < sum.length; i++) {
+                    if (sum[i] > basis[i] - 1) {
+                        solution = false;
+                        break;
+                    }
+                }
+                if (solution) {
+                    System.out.println(Arrays.toString(sum));
+                }
+
+            }
+            return;
         }
-        System.out.println(cnt);
+
+        for (int i = 0; i < bugdet; i++) {
+            sum[counter] = i;
+            level(bugdet - i, ++counter);
+            sum[--counter] = 0;
+        }
 
     }
 
@@ -135,6 +181,8 @@ public class Lattice {
 
         // create levels
         levels = createLevels();
+
+        this.sum = new int[maxLevels.length];
 
     }
 
